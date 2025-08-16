@@ -9,7 +9,7 @@ pip install ScratchExtensionTools
 ```
 
 ## 📜 Changelog
-See [CHANGELOG.md](https://github.com/你的仓库/ScratchExtensionTools/blob/main/CHANGELOG.md)
+See [CHANGELOG.md](https://github.com/qiufengcute/ScratchExtensionTools/blob/main/CHANGELOG.md)
 
 
 ## QuickStart
@@ -43,3 +43,4 @@ print(js_code)  # => Scratch JS Extension
 In Scratch extension JSON, the property is filter.
 But since filter is a Python built-in, this library uses the keyword showin on the Python side.
 It will still output filter correctly in the generated Scratch extension JSON.
+
