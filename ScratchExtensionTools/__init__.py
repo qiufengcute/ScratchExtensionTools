@@ -3,7 +3,7 @@ import inspect
 import pscript
 from typing import Union, List, Dict, Callable, Optional
 
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 
 class ScratchExtensionBuilder:
     def __init__(self):
@@ -311,3 +311,4 @@ class ScratchExtensionBuilder:
 
         except Exception as e:
             raise RuntimeError(f"生成扩展代码时出错: {str(e)}")
+
