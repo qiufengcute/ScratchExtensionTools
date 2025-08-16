@@ -8,7 +8,7 @@ license = "MIT"
 keywords = ["scratch", "extension", "builder", "pscript"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
 
@@ -24,3 +24,4 @@ pscript = ">=0.7,<1.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
