@@ -14,7 +14,7 @@ See [CHANGELOG.md](https://github.com/qiufengcute/ScratchExtensionTools/blob/mai
 
 ## QuickStart
 ```Python
-from scratch_extension_builder import ScratchExtensionBuilder
+from ScratchExtensionTools import ScratchExtensionBuilder
 
 builder = ScratchExtensionBuilder()
 
