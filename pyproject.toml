@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ScratchExtensionTools"
-version = "1.1.4"
+version = "1.2.0"
 description = "Tools to help build Scratch extensions in Python."
 authors = ["qiufeng <appleidqiufeng@outlook.com>"]
 readme = "README.md"
