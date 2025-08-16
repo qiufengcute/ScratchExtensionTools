@@ -8,7 +8,7 @@ license = "MIT"
 keywords = ["scratch", "extension", "builder", "pscript"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: MIT",
+    "License :: OSI Approved :: MIT",
     "Operating System :: OS Independent"
 ]
 
