@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+- (Nothing yet)
+
+## 1.1.4 - 2025-08-16
+- Fix: wrong key in `filter` docs (`stage/sprites` → `stage/sprite`)
+
 ## 1.1.3 - 2025-08-16
 - Edit README
 
