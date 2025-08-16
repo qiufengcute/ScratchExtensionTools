@@ -1,7 +1,8 @@
 # Changelog
 
-## [Unreleased]
-- (Nothing yet)
+## 1.2.0 - 2025-08-16
+- Add support for dynamic menus
+- Remov `add_import`
 
 ## 1.1.4 - 2025-08-16
 - Fix: wrong key in `filter` docs (`stage/sprites` → `stage/sprite`)
