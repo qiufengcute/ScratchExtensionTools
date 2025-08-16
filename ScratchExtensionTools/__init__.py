@@ -3,15 +3,13 @@ import inspect
 import pscript
 from typing import Union, List, Dict, Callable, Optional
 
-__version__ = "1.1.4"
+__version__ = "1.2.0"
 
 class ScratchExtensionBuilder:
     def __init__(self):
         """初始化扩展构建器"""
         self.blocks = []
         self.menus = {}
-        self.current_block_id = 0
-        self.current_menu_id = 0
         self.extension_meta = {
             "id":"",
             "name":"",
@@ -22,26 +20,43 @@ class ScratchExtensionBuilder:
         }
         self.js_functions = []
         self.global_vars = []
-        self.imports = ['"use strict";']
 
-    def _py_to_js(self, py_code: str) -> str:
+    def _py_to_js(self, py_func: Callable) -> str:
         """
         将Python代码转换为JavaScript代码
         
         参数:
-            py_code: 要转换的Python代码
+            py_func: 要转换的Python函数
             
         返回:
             转换后的JavaScript代码
         """
-        return pscript.py2js(py_code)
-
-    def add_import(self, js_code: str) -> None:
-        """添加JavaScript导入语句"""
-        self.imports.append(js_code)
+        # 获取函数源代码
+        py_source = inspect.getsource(py_func)
+        # 去掉装饰器和def行
+        py_lines = py_source.split('\n')[1:]
+        # 去掉基础缩进
+        if py_lines:
+            first_line = next((line for line in py_lines if line.strip()), '')
+            if first_line:
+                indent = len(first_line) - len(first_line.lstrip())
+                py_lines = [line[indent:] if len(line) >= indent else line for line in py_lines]
+        # 转换为JS
+        no_indented_js_code = pscript.py2js('\n'.join(py_lines))
+        # 为JS代码添加适当缩进并返回代码
+        return '\n'.join(
+            '            ' + line if line.strip() else line 
+            for line in no_indented_js_code.split('\n')
+        )
 
     def add_global_var(self, name: str, value: str = None) -> None:
-        """添加全局变量"""
+        """
+        添加全局变量
+        
+        参数:
+            name: 全局变量名称(英文)
+            value: 全局变量初始值
+        """
         if value:
             self.global_vars.append(f'let {name} = {value};')
         else:
@@ -94,18 +109,7 @@ class ScratchExtensionBuilder:
 
         # 生成JS函数
         if py_func is not None:
-            # 获取函数源代码
-            py_source = inspect.getsource(py_func)
-            # 去掉装饰器和def行
-            py_lines = py_source.split('\n')[1:]
-            # 去掉基础缩进
-            if py_lines:
-                first_line = next((line for line in py_lines if line.strip()), '')
-                if first_line:
-                    indent = len(first_line) - len(first_line.lstrip())
-                    py_lines = [line[indent:] if len(line) >= indent else line for line in py_lines]
-            # 转换为JS
-            js_code = self._py_to_js('\n'.join(py_lines))
+            js_code = self._py_to_js(py_func)
         else:
             js_code = js_func
 
@@ -124,11 +128,12 @@ class ScratchExtensionBuilder:
             block_data['isTerminal'] = True
 
         self.blocks.append(block_data)
-        self.current_block_id += 1
 
     def create_menu(self, 
                    name: str, 
-                   items: Union[List[str], str], 
+                   items: Union[List[str], None] = None,
+                   js_func:str | None = None,
+                   py_func: Optional[Callable] = None, 
                    accept_reporters: bool = False,
                    dynamic: bool = False) -> None:
         """
@@ -136,7 +141,9 @@ class ScratchExtensionBuilder:
         
         参数:
             name: 菜单名称(英文)
-            items: 菜单选项列表或动态菜单函数名
+            items: 菜单选项列表或动态菜单函数名,动态菜单情况忽略
+            py_func: 动态菜单Python函数(会自动转换为JS),静态菜单情况忽略
+            js_func: 动态菜单直接提供的JS代码(可选),静态菜单情况忽略
             accept_reporters: 是否接受输入框
             dynamic: 是否是动态菜单
             
@@ -145,8 +152,10 @@ class ScratchExtensionBuilder:
         """
         if not isinstance(name, str) or not name.strip():
             raise ValueError("菜单名称必须是非空字符串(英文)")
-        if not (isinstance(items, list) or isinstance(items, str)):
-            raise ValueError("items必须是字符串列表或字符串(动态菜单)")
+        if not dynamic and items is None:
+            raise ValueError("静态菜单必须提供items")
+        if dynamic and (py_func is None and js_func is None):
+            raise ValueError("动态菜单必须提供py_func或js_func")
 
         if isinstance(items, list):
             if not all(isinstance(item, str) for item in items):
@@ -155,13 +164,11 @@ class ScratchExtensionBuilder:
                 raise ValueError("菜单选项不能为空")
 
         self.menus[name] = {
-            'id': f'menu_{self.current_menu_id}',
             'name': name,
             'acceptReporters': accept_reporters,
             'items': items if not dynamic else None,
-            'dynamic': items if dynamic else None
+            'dynamic_code': self._py_to_js(py_func) if js_func is None else js_func if dynamic else None
         }
-        self.current_menu_id += 1
 
     def add_js_function(self, js_code: str) -> None:
         """添加自定义JavaScript函数"""
@@ -210,7 +217,7 @@ class ScratchExtensionBuilder:
         try:
             # 生成扩展基本信息
             js_code = f"""(function(Scratch) {{
-    {'\n    '.join(self.imports)}
+    {'\n    "use strict";'}
     
     // 全局变量
     {'\n    '.join(self.global_vars)}
@@ -271,8 +278,8 @@ class ScratchExtensionBuilder:
                 for menu_name, menu in self.menus.items():
                     menu_def = f"                    {menu_name}: {{\n"
                     menu_def += f"                        acceptReporters: {json.dumps(menu['acceptReporters'])},\n"
-                    if menu['dynamic']:
-                        menu_def += f"                        items: \"{menu['dynamic']}\"\n"
+                    if menu['dynamic_code']:
+                        menu_def += f"                        items: \"{menu_name}\"\n"
                     else:
                         menu_def += f"                        items: {json.dumps(menu['items'])}\n"
                     menu_def += "                    }"
@@ -287,19 +294,26 @@ class ScratchExtensionBuilder:
         }}
 """
 
+            # 添加菜单动态函数
+            for menu in self.menus.values():
+                if menu['dynamic_code']:
+                    js_code += f"""
+        {menu['name']}() {{
+{menu['dynamic_code']}
+        }}
+"""
+
             # 添加自定义JS函数
             for func in self.js_functions:
-                js_code += f"\n    {func}\n"
+                js_code += f"\n        {func}\n"
 
             # 添加积木对应的JavaScript函数
             for block in self.blocks:
                 if block['type'] == 'label':
                     continue
-                # 为JS代码添加适当缩进
-                indented_js = '\n'.join('            ' + line if line.strip() else line for line in block['js_code'].split('\n'))
                 js_code += f"""
         {block['opcode']}(args) {{
-{indented_js}
+{block['js_code']}
         }}
 """
 
