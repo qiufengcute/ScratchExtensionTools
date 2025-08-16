@@ -1,11 +1,15 @@
 # Changelog
 
+## 1.1.3 - 2025-08-16
+- Edit README
+
 ## 1.1.2 - 2025-08-16
 - Renamed `v` variable to `__version__`
 - Removed `version()` function
 - Improved documentation
 - Renamed Python-side argument `filter` → `showin` (to avoid conflict with Python built-in).  
   Still generates `filter` in Scratch JSON (required by Scratch).
+- Add LICENSE and CHANGELOG
 
 ## 1.1.1 - 2025-08-16
 - Removed leftover test code
