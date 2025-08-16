@@ -3,7 +3,7 @@ import inspect
 import pscript
 from typing import Union, List, Dict, Callable, Optional
 
-__version__ = "1.1.3"
+__version__ = "1.1.4"
 
 class ScratchExtensionBuilder:
     def __init__(self):
@@ -66,7 +66,7 @@ class ScratchExtensionBuilder:
             args: 积木参数配置
             py_func: Python函数(会自动转换为JS)
             js_func: 直接提供的JS代码(可选)
-            show_in: 积木显示的位置列表(如['sprites','stage'])
+            show_in: 积木显示的位置列表(如['sprite','stage'])
             is_terminal: 是否不能连接下方积木
             
         异常:
@@ -311,4 +311,3 @@ class ScratchExtensionBuilder:
 
         except Exception as e:
             raise RuntimeError(f"生成扩展代码时出错: {str(e)}")
-
