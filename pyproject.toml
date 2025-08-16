@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "ScratchExtensionTools"
+version = "1.1.2"
+description = "Tools to help build Scratch extensions in Python."
+authors = ["qiufeng <appleidqiufeng@outlook.com>"]
+readme = "README.md"
+license = "MIT"
+keywords = ["scratch", "extension", "builder", "pscript"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: MIT",
+    "Operating System :: OS Independent"
+]
+
+[tool.poetry.urls]
+"Homepage" = "https://github.com/qiufengcute/ScratchExtensionTools"
+"Repository" = "https://github.com/qiufengcute/ScratchExtensionTools"
+"Changelog" = "https://github.com/qiufengcute/ScratchExtensionTools/blob/main/CHANGELOG.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pscript = ">=0.7,<1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
