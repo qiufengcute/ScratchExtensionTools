@@ -26,7 +26,7 @@ builder.create_block(
     block_type="command",
     text="say hello",
     py_func=hello_func,
-    show_in=['sprites']  # Python side argument, exported as `filter` in Scratch JSON
+    show_in=['sprite']  # Python side argument, exported as `filter` in Scratch JSON
 )
 
 js_code = builder.build_extension(
