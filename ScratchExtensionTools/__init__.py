@@ -3,7 +3,7 @@ import inspect
 import pscript
 from typing import Union, List, Dict, Callable, Optional
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 
 class ScratchExtensionBuilder:
     def __init__(self):
@@ -21,7 +21,8 @@ class ScratchExtensionBuilder:
         self.js_functions = []
         self.global_vars = []
 
-    def _py_to_js(self, py_func: Callable) -> str:
+    def _py_to_js(self, 
+                py_func: Callable) -> str:
         """
         将Python代码转换为JavaScript代码
         
@@ -43,13 +44,28 @@ class ScratchExtensionBuilder:
                 py_lines = [line[indent:] if len(line) >= indent else line for line in py_lines]
         # 转换为JS
         no_indented_js_code = pscript.py2js('\n'.join(py_lines))
+        return no_indented_js_code
+    
+    def _js_add_indented(self, 
+                        js_func: str):
+        """
+        为JS代码添加缩进
+        
+        参数:
+            js_func: 要添加缩进的js代码
+
+        返回:
+            添加好缩进的js代码
+        """
         # 为JS代码添加适当缩进并返回代码
         return '\n'.join(
             '            ' + line if line.strip() else line 
-            for line in no_indented_js_code.split('\n')
+            for line in js_func.split('\n')
         )
 
-    def add_global_var(self, name: str, value: str = None) -> None:
+    def add_global_var(self, 
+                    name: str, 
+                    value: Optional[str] = None) -> None:
         """
         添加全局变量
         
@@ -66,7 +82,7 @@ class ScratchExtensionBuilder:
                     opcode: str,
                     block_type: str, 
                     text: str, 
-                    args: Dict = None,
+                    args: Optional[Dict] = None,
                     py_func: Optional[Callable] = None,
                     js_func: Optional[str] = None,
                     show_in: Optional[List[str]] = None,
@@ -77,7 +93,7 @@ class ScratchExtensionBuilder:
         参数:
             opcode: 积木的唯一操作码(英文)
             block_type: 积木类型(label/button/command/reporter/boolean/hat)
-            text: 积木上显示的文本(支持[ARG]等占位符)
+            text: 积木上显示的文本(支持[ARG]占位符)
             args: 积木参数配置
             py_func: Python函数(会自动转换为JS)
             js_func: 直接提供的JS代码(可选)
@@ -115,7 +131,7 @@ class ScratchExtensionBuilder:
 
         # 保存积木配置
         block_data = {
-            'opcode': opcode,
+            'opcode': f"opcode",
             'type': block_type.lower(),
             'text': text,
             'args': processed_args,
@@ -130,12 +146,12 @@ class ScratchExtensionBuilder:
         self.blocks.append(block_data)
 
     def create_menu(self, 
-                   name: str, 
-                   items: Union[List[str], None] = None,
-                   js_func:str | None = None,
-                   py_func: Optional[Callable] = None, 
-                   accept_reporters: bool = False,
-                   dynamic: bool = False) -> None:
+                    name: str, 
+                    items: Union[List[str], None] = None,
+                    js_func: Optional[str] = None,
+                    py_func: Optional[Callable] = None, 
+                    accept_reporters: bool = False,
+                    dynamic: bool = False) -> None:
         """
         创建一个下拉菜单
         
@@ -170,9 +186,29 @@ class ScratchExtensionBuilder:
             'dynamic_code': self._py_to_js(py_func) if js_func is None else js_func if dynamic else None
         }
 
-    def add_js_function(self, js_code: str) -> None:
-        """添加自定义JavaScript函数"""
-        self.js_functions.append(js_code)
+    def add_js_function(self, 
+                        name: str, 
+                        js_func: Optional[str] = None,
+                        py_func: Optional[Callable] = None) -> None:
+        """
+        添加自定义JS函数
+        
+        参数:
+            name: 自定义JS函数名(因为)
+            py_func: Python函数(会自动转换为JS)
+            js_func: 直接提供的JS代码(可选)
+
+        异常:
+            ValueError: 如果参数不合法
+        """
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("函数名称必须是非空字符串(英文)")
+        if py_func is None and js_func is None:
+            raise ValueError("必须提供py_func或js_func")
+        self.js_functions.append({
+            'name': name,
+            'code': self._py_to_js(py_func) if js_func is None else js_func
+        })
 
     def build_extension(self,
                        ext_id: str,
@@ -188,7 +224,8 @@ class ScratchExtensionBuilder:
             ext_id: 扩展的唯一ID(英文)
             ext_name: 扩展的显示名称
             ext_color: 扩展颜色(十六进制)
-            ext_icon: 扩展图标的DataURL
+            ext_menu_icon: 扩展在类别栏图标的DataURL
+            ext_block_icon: 扩展积木图标的DataURL
             ext_docs: 扩展文档URL
             
         返回:
@@ -299,13 +336,17 @@ class ScratchExtensionBuilder:
                 if menu['dynamic_code']:
                     js_code += f"""
         {menu['name']}() {{
-{menu['dynamic_code']}
+{self._js_add_indented(menu['dynamic_code'])}
         }}
 """
 
             # 添加自定义JS函数
             for func in self.js_functions:
-                js_code += f"\n        {func}\n"
+                js_code += f"""
+        {func['name']}() {{
+{self._js_add_indented(func['code'])}
+        }}
+"""
 
             # 添加积木对应的JavaScript函数
             for block in self.blocks:
@@ -313,7 +354,7 @@ class ScratchExtensionBuilder:
                     continue
                 js_code += f"""
         {block['opcode']}(args) {{
-{block['js_code']}
+{self._js_add_indented(block['js_code'])}
         }}
 """
 
