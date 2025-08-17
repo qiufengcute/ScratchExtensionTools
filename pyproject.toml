@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ScratchExtensionTools"
-version = "1.2.1"
+version = "1.2.2"
 description = "Tools to help build Scratch extensions in Python."
 authors = ["qiufeng <appleidqiufeng@outlook.com>"]
 readme = "README.md"
@@ -24,4 +24,5 @@ pscript = ">=0.7,<1.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
 
