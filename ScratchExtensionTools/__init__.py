@@ -3,7 +3,7 @@ import inspect
 import pscript
 from typing import Union, List, Dict, Callable, Optional
 
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
 class ScratchExtensionBuilder:
     def __init__(self):
@@ -131,7 +131,7 @@ class ScratchExtensionBuilder:
 
         # 保存积木配置
         block_data = {
-            'opcode': f"opcode",
+            'opcode': opcode,
             'type': block_type.lower(),
             'text': text,
             'args': processed_args,
