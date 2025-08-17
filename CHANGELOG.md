@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 - 2025-08-17
+- Edit docs
+- Edit `add_js_function`
+
 ## 1.2.0 - 2025-08-16
 - Add support for dynamic menus
 - Remov `add_import`
