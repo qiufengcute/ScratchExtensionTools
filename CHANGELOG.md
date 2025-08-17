@@ -1,8 +1,12 @@
 # Changelog
 
-## 1.2.1 - 2025-08-17
+## 1.2.2 - 2025-08-17
+- Fix: now block's opcode isn't always `opcode`
+
+## 1.2.1 (yanked) - 2025-08-17
 - Edit docs
 - Edit `add_js_function`
+- Block's opcode always is `opcode` → version yanked
 
 ## 1.2.0 - 2025-08-16
 - Add support for dynamic menus
@@ -34,4 +38,3 @@
 
 ## 1.0.0 - 2025-08-08
 - Initial release 🎉
-
